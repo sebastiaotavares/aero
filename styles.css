@@ -173,7 +173,7 @@ h4 {
 
 .imagem-container {
   margin-top: 20px;
-  padding-left: 250px;
+  padding-left: auto;
 }
 img {
   max-width: 100%;
