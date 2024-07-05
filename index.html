@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informação Aeronautica</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <h1 class="logo">CONDIÇÃO AEROPORTOS</h1>
+        <ul class="nav-links">
+          <li><a href="infoaero.html">Informação Aeroporto</a></li>
+          <li><a href="statusaero.html">Status Aeroporto</a></li>
+          <li><a href="redemet.html" >Redemet</a></li>
+          
+        </ul>
+      </div>
+    </nav>
+  </header>
+  
+  <main class="container" id="conteudo">
+    <section class="landing">
+      <h2>Bem-vindo a pagina de pesquisa</h2>
+      <p>Escolha a sua informação Aeronautica e busque pelos aeroportos de interesse</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2024 By Sebastião Tavares. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script>
+    function carregarPagina(pagina) {
+      fetch(`${pagina}.html`)
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('conteudo').innerHTML = html;
+        })
+        .catch(error => console.error('Erro ao carregar página:', error));
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status Aeroporto</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var icaoInput = document.getElementById('local');
+        
+        icaoInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase(); // Converter para maiúsculas enquanto digita
+        });
+    });
+</script>
+
+</head>
+<body>
+  <header>
+    <h1>Status Aeroporto</h1>
+
+  </header>
+  
+<div class="div form">
+  <form id="consulta-form">
+    <label for="local">Código do Local (ICAO):</label>
+    <input type="text" id="local" name="local" placeholder="Informe um ou mais códigos ICAO separados por vírgula e espaço" required>
+    <br><br>
+    <br><br>
+    <button type="submit">Consultar</button>
+    <a href="index.html"> <button class="voltar" type="button">Voltar</button></a>
+</form>
+</div>
+
+<div id="resultado-api">
+    <!-- Aqui serão exibidos os dados da API -->
+</div>
+
+<script>
+    const form = document.getElementById('consulta-form');
+    const resultadoApi = document.getElementById('resultado-api');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const local = formData.get('local').trim().toUpperCase();
+        // const msg = formData.get('msg'); // Se quiser usar o tipo de mensagem, descomente esta linha
+
+        // Dividir os códigos ICAO informados pelo usuário por vírgula e remover espaços extras
+        const codigosICAO = local.split(',').map(codigo => codigo.trim());
+
+        // Iterar sobre cada código ICAO e buscar os dados na API
+        Promise.all(
+            codigosICAO.map(codigo => {
+                const apiUrl = `https://api-redemet.decea.mil.br/aerodromos/status/localidades/${codigo}?api_key=OVbnM4U9GLsHrQAoZO5PrcgsJkLWYMoZUt5jaInG`;
+
+                return fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Não foi possível carregar os dados da API para ${codigo}`);
+                        }
+                        return response.json();
+                    });
+            })
+        )
+        .then(results => {
+            // Limpar div de resultados antes de exibir novos resultados
+            resultadoApi.innerHTML = '';
+
+            // Exibir os resultados para cada código ICAO
+            results.forEach(data => {
+                if (data.status === true && data.data.length > 0) {
+                    const infoAerodromo = data.data[0];
+                    exibirDados(infoAerodromo);
+                } else {
+                    throw new Error(`Dados para ${data.data[0]} estão incompletos ou não encontrados.`);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Erro ao carregar os dados da API:', error);
+            resultadoApi.innerHTML = `<p class="erro">Erro ao carregar os dados da API. Detalhes: ${error.message}</p>`;
+        });
+    });
+
+    function exibirDados(infoAerodromo) {
+        const divResultado = document.createElement('div');
+        divResultado.classList.add('resultado-item');
+
+        divResultado.innerHTML = `
+            <h3>Informações do Aeródromo ${infoAerodromo[0]}</h3>
+            <p><strong>Nome:</strong> ${infoAerodromo[1]}</p>
+            <p><strong>Coordenadas:</strong> Lat ${infoAerodromo[2]}, Lon ${infoAerodromo[3]}</p>
+            <p><strong>Tipo:</strong> ${infoAerodromo[4]}</p>
+            <p><strong>METAR:</strong></p>
+            <pre>${infoAerodromo[5]}</pre>
+        `;
+
+        resultadoApi.appendChild(divResultado);
+    }
+</script>
+
+
+  <footer>
+    <p>&copy; 2024 Aeroclube. Todos os direitos reservados.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Dados METAR - RedeMET</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var icaoInput = document.getElementById('local');
+        
+        icaoInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase(); // Converter para maiúsculas enquanto digita
+        });
+    });
+
+    function consultarDados() {
+        const form = document.getElementById('consulta-form');
+        const resultadoApi = document.getElementById('resultado-api');
+        const localidades = document.getElementById('local').value.trim().toUpperCase();
+        const codigosICAO = localidades.split(',').map(localidade => localidade.trim());
+
+        resultadoApi.innerHTML = ''; // Limpar resultados anteriores
+
+        codigosICAO.forEach(codigo => {
+            const apiUrl = `https://api-redemet.decea.mil.br/aerodromos/info?api_key=OVbnM4U9GLsHrQAoZO5PrcgsJkLWYMoZUt5jaInG&localidade=${codigo}`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Não foi possível carregar os dados da API para ${codigo}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    exibirDados(data);
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar os dados da API:', error);
+                    const divErro = document.createElement('div');
+                    divErro.classList.add('resultado-item');
+                    divErro.innerHTML = `<p class="erro">Erro ao carregar os dados da API para ${codigo}. Detalhes: ${error.message}</p>`;
+                    resultadoApi.appendChild(divErro);
+                });
+        });
+    }
+
+    function exibirDados(data) {
+        const resultadoApi = document.getElementById('resultado-api');
+
+        if (data && data.status && data.data) {
+            const aerodromo = data.data;
+
+            const divResultado = document.createElement('div');
+            divResultado.classList.add('resultado-item');
+
+            divResultado.innerHTML = `
+                <h3>Informações do Aeródromo ${aerodromo.localidade}</h3>
+                <p><strong>Nome:</strong> ${aerodromo.nome}</p>
+                <p><strong>Cidade:</strong> ${aerodromo.cidade}</p>
+                <p><strong>Coordenadas:</strong> ${aerodromo.localizacao}</p>
+                <p><strong>METAR:</strong></p>
+                <pre>${aerodromo.metar}</pre>
+                <p><strong>Data:</strong> ${aerodromo.data}</p>
+                <p><strong>Temperatura:</strong> ${aerodromo.temperatura}</p>
+                <p><strong>Umidade Relativa:</strong> ${aerodromo.ur}</p>
+                <p><strong>Visibilidade:</strong> ${aerodromo.visibilidade}</p>
+                <p><strong>Teto:</strong> ${aerodromo.teto}</p>
+                <p><strong>Céu:</strong> ${aerodromo.ceu}</p>
+                <p><strong>Condições de Tempo:</strong> ${aerodromo.condicoes_tempo}</p>
+                <img src="${aerodromo.tempoImagem}" alt="Condições de Tempo">
+            `;
+
+            resultadoApi.appendChild(divResultado);
+        } else {
+            const divErro = document.createElement('div');
+            divErro.classList.add('resultado-item');
+            divErro.innerHTML = `<p class="erro">Dados incompletos ou não encontrados para ${data.data.localidade}</p>`;
+            resultadoApi.appendChild(divErro);
+        }
+    }
+</script>
+
+
+</head>
+<body>
+  <header>
+    <h1>Informação Aeroporto</h1>
+
+  </header>
+  
+<div class="form">
+
+  <form id="consulta-form" onsubmit="consultarDados(); return false;">
+      <label for="local">Código(s) do Local (ICAO):</label>
+      <input type="text" id="local" name="local" placeholder="Informe um ou mais códigos ICAO separados por vírgula" required>
+      <br><br>
+      <button type="submit">Consultar</button>
+      <a href="index.html"> <button class="voltar" type="button">Voltar</button></a>
+  </form>
+
+  <div id="resultado-api">
+      <!-- Aqui serão exibidos os dados da API -->
+  </div>
+
+</div>
+
+  <footer>
+    <p>&copy; 2024 Aeroclube. Todos os direitos reservados.</p>
+  </footer>
+</body>
+</html>
