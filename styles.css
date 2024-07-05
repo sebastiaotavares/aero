@@ -171,6 +171,15 @@ h4 {
     margin-top: 10px;
 }
 
+.imagem-container {
+  margin-top: 20px;
+  padding-left: 250px;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 .myButton {
   background-color: #1c1b72;
   color: white;
