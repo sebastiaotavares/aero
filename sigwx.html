@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Consulta de Dados METAR - RedeMET</title>
+  <link rel="stylesheet" href="styles.css">
+
+
+</head>
+<body>
+  <header>
+    <h1>SIGWX</h1>
+    <a class="myButton" href="index.html">Voltar</a>
+    <a class="myButton" id="btnConsultar">Consultar</a>
+
+  </header>
+  
+
+  <h1>Consulta SIGWX</h1>
+  
+       
+    
+  
+
+  <div class="imagem-container">
+      <h2>Resultado da API</h2>
+    <p id="imagemUrl"></p>
+      <img id="imagemResultado" src="" alt="Imagem da API Redemet">
+  </div>
+
+  <script>
+      document.getElementById('btnConsultar').addEventListener('click', function() {
+          fetch('https://api-redemet.decea.mil.br/produtos/sigwx?api_key=OVbnM4U9GLsHrQAoZO5PrcgsJkLWYMoZUt5jaInG')
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Erro ao consultar API: ' + response.statusText);
+                  }
+                  return response.text();
+              })
+              .then(data => {
+                  // Assume que data é a URL da imagem diretamente
+                  if (!data.trim()) {
+                      throw new Error('URL da imagem não encontrada na resposta da API.');
+                  }
+
+                  // Mostrar a URL da imagem e exibir a imagem na página
+                  document.getElementById('imagemUrl').textContent = 'URL da imagem: ' + data;
+                  document.getElementById('imagemResultado').src = data;
+              })
+              .catch(error => {
+                  console.error('Erro ao consultar API:', error);
+                  alert('Erro ao consultar API. Verifique o console para mais detalhes.');
+              });
+      });
+  </script>
+
+
+
+  <footer>
+    <p>&copy; 2024 By Sebastião Tavares. Todos os direitos reservados.</p>
+  </footer>
+</body>
+</html>
