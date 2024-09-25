@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Horas de Voo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #555;
+        }
+
+        input[type="datetime-local"],
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        .resultado {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registro de Horas de Voo</h1>
+        
+        <h2>Avião Rebocador</h2>
+        <form id="formRebocador">
+            <label for="aviaoRebocador">Selecionar Avião Rebocador:</label>
+            <select id="aviaoRebocador" name="aviaoRebocador" required>
+                <option value="rebocador1">PT-GCU</option>
+                <option value="rebocador2">PP-JYI</option>
+                <option value="rebocador3">PP-GRP</option>
+            </select>
+
+            <label for="horaDecolagem">Hora de Decolagem:</label>
+            <input type="datetime-local" id="horaDecolagem" name="horaDecolagem" required>
+            <button type="button" onclick="marcarHora('horaDecolagem')">Marcar Hora de Decolagem</button>
+
+            <label for="horaPouso">Hora de Pouso:</label>
+            <input type="datetime-local" id="horaPouso" name="horaPouso" required>
+            <button type="button" onclick="marcarHora('horaPouso')">Marcar Hora de Pouso</button>
+        </form>
+
+        <h2>Planador</h2>
+        <form id="formPlanador">
+            <label for="planador">Selecionar Planador:</label>
+            <select id="planador" name="planador" required>
+                <option value="planador1">PT-JRI</option>
+                <option value="planador2">PP-CIJ</option>
+                <option value="planador3">PP-TES</option>
+            </select>
+
+            <label for="horaDesligamento">Hora de Desligamento:</label>
+            <input type="datetime-local" id="horaDesligamento" name="horaDesligamento" required>
+            <button type="button" onclick="marcarHora('horaDesligamento')">Marcar Hora de Desligamento</button>
+
+            <label for="horaPousoPlanador">Hora de Pouso:</label>
+            <input type="datetime-local" id="horaPousoPlanador" name="horaPousoPlanador" required>
+            <button type="button" onclick="marcarHora('horaPousoPlanador')">Marcar Hora de Pouso</button>
+        </form>
+
+        <button onclick="exportarExcel()">Exportar para Excel</button>
+
+        <div class="resultado" id="resultadoPlanador"></div>
+    </div>
+
+    <a class="myButton" href="index.html">Voltar</a>
+
+    <script>
+        // Função para marcar a data e hora atuais
+        function marcarHora(id) {
+            const agora = new Date();
+            const dataHoraFormatada = agora.toISOString().slice(0, 16);
+            document.getElementById(id).value = dataHoraFormatada;
+        }
+
+        // Função para calcular e mostrar o tempo de voo planado
+        function calcularTempos() {
+            const horaDecolagem = new Date(document.getElementById('horaDecolagem').value);
+            const horaPousoRebocador = new Date(document.getElementById('horaPouso').value);
+            const horaDesligamento = new Date(document.getElementById('horaDesligamento').value);
+            const horaPousoPlanador = new Date(document.getElementById('horaPousoPlanador').value);
+
+            const tempoReboque = (horaDesligamento - horaDecolagem) / 1000 / 60; // em minutos
+            const tempoVooPlanado = (horaPousoPlanador - horaDesligamento) / 1000 / 60; // em minutos
+
+            return {
+                tempoReboque,
+                tempoVooPlanado
+            };
+        }
+
+        // Função para exportar dados para Excel
+        function exportarExcel() {
+            const { tempoReboque, tempoVooPlanado } = calcularTempos();
+
+            const wb = XLSX.utils.book_new();
+            const ws_data = [
+                ["Avião Rebocador", "", "", "Planador", "", ""],
+                ["Avião", document.getElementById('aviaoRebocador').value, "Hora Decolagem", document.getElementById('horaDecolagem').value, "Hora Desligamento", document.getElementById('horaDesligamento').value],
+                ["", "", document.getElementById('horaPouso').value, "", "Hora Pouso", document.getElementById('horaPousoPlanador').value],
+                ["", "", `Tempo Reboque: ${tempoReboque} minutos`, "", `Tempo de Voo Planado: ${tempoVooPlanado} minutos`]
+            ];
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            XLSX.utils.book_append_sheet(wb, ws, "Registro de Voo");
+            XLSX.writeFile(wb, "registro_voo.xlsx");
+        }
+    </script>
+</body>
+</html>
