@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Horas de Voo</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -72,7 +71,7 @@
             <label for="aviaoRebocador">Selecionar Avião Rebocador:</label>
             <select id="aviaoRebocador" name="aviaoRebocador" required>
                 <option value="rebocador1">PT-GCU</option>
-                <option value="rebocador2">PP-JYI</option>
+                <option value="rebocador2">PT-JYI</option>
                 <option value="rebocador3">PP-GRP</option>
             </select>
 
@@ -89,9 +88,9 @@
         <form id="formPlanador">
             <label for="planador">Selecionar Planador:</label>
             <select id="planador" name="planador" required>
-                <option value="planador1">PT-JRI</option>
-                <option value="planador2">PP-CIJ</option>
-                <option value="planador3">PP-TES</option>
+                <option value="planador1">PT-JRU</option>
+                <option value="planador2">PP-TES</option>
+                <option value="planador3">PT-JIG</option>
             </select>
 
             <label for="horaDesligamento">Hora de Desligamento:</label>
@@ -103,12 +102,10 @@
             <button type="button" onclick="marcarHora('horaPousoPlanador')">Marcar Hora de Pouso</button>
         </form>
 
-        <button onclick="exportarExcel()">Exportar para Excel</button>
+        <button onclick="exportarTXT()">Exportar para .txt</button>
 
         <div class="resultado" id="resultadoPlanador"></div>
     </div>
-
-    <a class="myButton" href="index.html">Voltar</a>
 
     <script>
         // Função para marcar a data e hora atuais
@@ -118,7 +115,7 @@
             document.getElementById(id).value = dataHoraFormatada;
         }
 
-        // Função para calcular e mostrar o tempo de voo planado
+        // Função para calcular tempos
         function calcularTempos() {
             const horaDecolagem = new Date(document.getElementById('horaDecolagem').value);
             const horaPousoRebocador = new Date(document.getElementById('horaPouso').value);
@@ -134,20 +131,29 @@
             };
         }
 
-        // Função para exportar dados para Excel
-        function exportarExcel() {
+        // Função para exportar dados para .txt
+        function exportarTXT() {
             const { tempoReboque, tempoVooPlanado } = calcularTempos();
 
-            const wb = XLSX.utils.book_new();
-            const ws_data = [
-                ["Avião Rebocador", "", "", "Planador", "", ""],
-                ["Avião", document.getElementById('aviaoRebocador').value, "Hora Decolagem", document.getElementById('horaDecolagem').value, "Hora Desligamento", document.getElementById('horaDesligamento').value],
-                ["", "", document.getElementById('horaPouso').value, "", "Hora Pouso", document.getElementById('horaPousoPlanador').value],
-                ["", "", `Tempo Reboque: ${tempoReboque} minutos`, "", `Tempo de Voo Planado: ${tempoVooPlanado} minutos`]
-            ];
-            const ws = XLSX.utils.aoa_to_sheet(ws_data);
-            XLSX.utils.book_append_sheet(wb, ws, "Registro de Voo");
-            XLSX.writeFile(wb, "registro_voo.xlsx");
+            const dados = `
+Avião Rebocador: ${document.getElementById('aviaoRebocador').value}
+Hora de Decolagem: ${document.getElementById('horaDecolagem').value}
+Hora de Pouso: ${document.getElementById('horaPouso').value}
+
+Planador: ${document.getElementById('planador').value}
+Hora de Desligamento: ${document.getElementById('horaDesligamento').value}
+Hora de Pouso: ${document.getElementById('horaPousoPlanador').value}
+Tempo de Reboque: ${tempoReboque} minutos
+Tempo de Voo Planado: ${tempoVooPlanado} minutos
+            `.trim();
+
+            const blob = new Blob([dados], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'registro_voo.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
