@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Horas de Voo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #555;
+        }
+
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        .resultado {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registro de Horas de Voo</h1>
+
+        <form id="registroVoo">
+            <label for="dataVoo">Data:</label>
+            <input type="date" id="dataVoo" name="dataVoo" required>
+
+            <label for="aviaoRebocador">Selecionar Avião Rebocador:</label>
+            <select id="aviaoRebocador" name="aviaoRebocador" required>
+                <option value="PT-GCU">PT-GCU</option>
+                <option value="PT-JYI">PT-JYI</option>
+                <option value="PP-GRP">PP-GRP</option>
+            </select>
+
+            <label for="pilotoRebocador">Piloto Rebocador:</label>
+            <select id="pilotoRebocador" name="pilotoRebocador" required>
+                <option value="Pettinelli">Pettinelli</option>
+                <option value="Marcos">Marcos</option>
+                <option value="Fredi">Fredi</option>
+            </select>
+
+            <label for="planador">Selecionar Planador:</label>
+            <select id="planador" name="planador" required>
+                <option value="PT-JRU">PT-JRU</option>
+                <option value="PP-TES">PP-TES</option>
+                <option value="PT-JIG">PT-JIG</option>
+            </select>
+
+            <label for="pilotoPlanador">Piloto Planador:</label>
+            <select id="pilotoPlanador" name="pilotoPlanador" required>
+                <option value="Fredi">Fredi</option>
+                <option value="Pettinelli">Pettinelli</option>
+                <option value="Marcos">Marcos</option>
+            </select>
+
+            <label for="horaDecolagem">Decolagem:</label>
+            <input type="time" id="horaDecolagem" name="horaDecolagem" required>
+            <button type="button" onclick="marcarHoraAtual('horaDecolagem')">Marcar</button>
+
+            <label for="horaDesligamento">Desligamento:</label>
+            <input type="time" id="horaDesligamento" name="horaDesligamento" required>
+            <button type="button" onclick="marcarHoraAtual('horaDesligamento')">Marcar</button>
+
+            <label for="alturaDesligamento">Altitude Desligamento (em pés):</label>
+            <input type="number" id="alturaDesligamento" name="alturaDesligamento" required min="0">
+
+            <label for="horaPousoRebocador">Pouso Rebocador:</label>
+            <input type="time" id="horaPousoRebocador" name="horaPousoRebocador" required>
+            <button type="button" onclick="marcarHoraAtual('horaPousoRebocador')">Marcar</button>
+
+            <label for="horaPousoPlanador">Pouso Planador:</label>
+            <input type="time" id="horaPousoPlanador" name="horaPousoPlanador" required>
+            <button type="button" onclick="marcarHoraAtual('horaPousoPlanador')">Marcar</button>
+
+        </form>
+
+        <button onclick="exportarTXT()">Exportar para .txt</button>
+    </div>
+    <a href="index.html"><button class="voltar" type="button">Voltar</button></a>
+
+    <script>
+        // Define the current date as the default value for the date input
+        window.onload = function() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('dataVoo').value = hoje;
+        };
+
+        // Função para marcar a hora atual
+        function marcarHoraAtual(id) {
+            const agora = new Date();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+            const horaAtual = `${horas}:${minutos}`;
+            document.getElementById(id).value = horaAtual;
+        }
+
+        // Função para calcular tempos
+        function calcularTempos() {
+            const dataVoo = document.getElementById('dataVoo').value;
+            const horaDecolagem = new Date(`${dataVoo}T${document.getElementById('horaDecolagem').value}`);
+            const horaDesligamento = new Date(`${dataVoo}T${document.getElementById('horaDesligamento').value}`);
+            const horaPousoRebocador = new Date(`${dataVoo}T${document.getElementById('horaPousoRebocador').value}`);
+            const horaPousoPlanador = new Date(`${dataVoo}T${document.getElementById('horaPousoPlanador').value}`);
+
+            const vooRebocador = ((horaPousoRebocador - horaDecolagem) / 1000 / 60).toFixed(2); // em minutos
+            const reboquePlanador = ((horaDesligamento - horaDecolagem) / 1000 / 60).toFixed(2); // em minutos
+            const vooPlanado = ((horaPousoPlanador - horaDesligamento) / 1000 / 60).toFixed(2); // em minutos
+            const vooTotalPlanador = ((horaPousoPlanador - horaDecolagem) / 1000 / 60).toFixed(2); // em minutos
+            const vooTotalRebocador = ((horaPousoRebocador - horaDecolagem) / 1000 / 60).toFixed(2); // em minutos
+
+            return {
+                dataVoo,
+                vooRebocador,
+                reboquePlanador,
+                vooPlanado,
+                vooTotalPlanador,
+                vooTotalRebocador,
+                alturaDesligamento: document.getElementById('alturaDesligamento').value
+            };
+        }
+
+        // Função para exportar dados para .txt
+        function exportarTXT() {
+            const { dataVoo, vooRebocador, reboquePlanador, vooPlanado, vooTotalPlanador, vooTotalRebocador, alturaDesligamento } = calcularTempos();
+
+            const dados = `
+Data: ${dataVoo}
+Avião Rebocador: ${document.getElementById('aviaoRebocador').value}
+Piloto Rebocador: ${document.getElementById('pilotoRebocador').value}
+Hora de Decolagem: ${document.getElementById('horaDecolagem').value}
+Hora de Pouso Rebocador: ${document.getElementById('horaPousoRebocador').value}
+Tempo de Voo Rebocador: ${vooTotalRebocador} minutos
+
+Planador: ${document.getElementById('planador').value}
+Piloto Planador: ${document.getElementById('pilotoPlanador').value}
+Hora de Desligamento: ${document.getElementById('horaDesligamento').value}
+Altitude Desligamento: ${alturaDesligamento} pés
+Hora de Pouso Planador: ${document.getElementById('horaPousoPlanador').value}
+Reboque Planador: ${reboquePlanador} minutos
+Tempo de Voo Planado: ${vooPlanado} minutos
+Tempo de Reboque: ${reboquePlanador} minutos
+Tempo Total Planador: ${vooTotalPlanador} minutos
+            `.trim();
+
+            const blob = new Blob([dados], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'registro_voo.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Limpa os campos do formulário
+            document.getElementById('registroVoo').reset();
+            // Define a data atual novamente
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('dataVoo').value = hoje;
+        }
+    </script>
+</body>
+</html>
